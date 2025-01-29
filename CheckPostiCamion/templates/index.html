@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VEM SISTEMI - Monitoraggio Parcheggi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <h1>VEM SISTEMI - Monitoraggio Parcheggi Camion</h1>
+    </header>
+
+    <!-- Tabella con i posti di parcheggio -->
+    <section id="parking">
+        <h2>Posti Disponibili</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID Posto</th>
+                    <th>Stato</th>
+                    <th>Disponibilità</th>
+                    <th>Azioni</th>
+                </tr>
+            </thead>
+            <tbody id="parking-body">
+                <!-- La tabella verrà popolata dinamicamente -->
+            </tbody>
+        </table>
+    </section>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
