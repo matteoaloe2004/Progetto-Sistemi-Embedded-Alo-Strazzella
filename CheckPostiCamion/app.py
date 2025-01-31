@@ -12,8 +12,7 @@ MQTT_TOPIC = "vem/slots"
 MQTT_USER = "MqttTest1"
 MQTT_PASSWORD = "MqttTest1"
 
-# Funzione di connessione al broker MQTT
-# Funzione di connessione al broker MQTT
+# Funzione per la connessione al broker MQTT
 def on_connect(client, userdata, flags, reason_code, properties=None):
     print(f"Connesso a {MQTT_BROKER_HOST} con codice {reason_code}")
     client.subscribe(MQTT_TOPIC)

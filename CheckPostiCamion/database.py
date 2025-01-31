@@ -19,7 +19,7 @@ def get_db_connection():
         print(f"Errore durante la connessione al database: {e}")
         return None
 
-
+ # Funzione per la creazione delle tabelle
 def create_tables():
     connection = get_db_connection()
     if connection is None:
@@ -48,7 +48,7 @@ def create_tables():
         connection.close()
         print("Connessione al database chiusa.")
 
-
+ # Funzione per la creazione dei posti predefiniti
 def create_default_slots():
     """
     Crea esattamente 15 posti con stato 'libero' se non sono già presenti.
@@ -80,7 +80,7 @@ def create_default_slots():
         connection.close()
         print("Connessione al database chiusa.")
 
-
+ 
 def insert_slot_status(slot_id, status):
     connection = get_db_connection()
     if connection is None:
