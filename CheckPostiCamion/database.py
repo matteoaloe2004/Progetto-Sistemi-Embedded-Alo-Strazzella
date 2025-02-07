@@ -75,10 +75,7 @@ def create_default_slots():
             print("I 15 posti sono già presenti nel database.")
     except Error as e:
         print(f"Errore durante l'inserimento dei posti: {str(e)}")
-    finally:
-        cursor.close()
-        connection.close()
-        print("Connessione al database chiusa.")
+    
 
  
 def insert_slot_status(slot_id, status):

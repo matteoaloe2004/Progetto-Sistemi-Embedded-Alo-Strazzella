@@ -1,6 +1,9 @@
 // Oggetto per tenere traccia degli slot sospesi
 const suspendedSlots = new Set();
 
+// Mappa per tenere traccia dello stato precedente degli slot sospesi
+const previousStates = new Map();
+
 // Connessione al broker MQTT
 const client = mqtt.connect('wss://833019dc465b486ba94ff7236c3f9795.s1.eu.hivemq.cloud:8884/mqtt', {
     username: "MqttTest1",
@@ -18,7 +21,7 @@ client.on('connect', function () {
 
 // Funzione per aggiornare la visualizzazione dello stato di un posto
 function updateSlot(slotId, status) {
-    // Se lo slot è sospeso, non fare nulla
+    // Se lo slot è sospeso, ignora completamente l'aggiornamento
     if (suspendedSlots.has(slotId)) {
         return;
     }
@@ -34,6 +37,9 @@ function updateSlot(slotId, status) {
             slotElement.innerText = "Libero";
             ledElement.style.backgroundColor = "green"; // LED verde
         }
+        
+        // Aggiorna lo stato precedente solo se il posto non è sospeso
+        previousStates.set(slotId, status);
     } else {
         console.error(`Elemento non trovato per slot ID: ${slotId}`);
     }
@@ -49,7 +55,8 @@ client.on('message', function (topic, message) {
         const slotId = match[1];
         const status = match[2];
 
-        updateSlot(slotId, status); // Aggiorna solo lo slot specifico
+        // Se lo slot NON è sospeso, aggiorna la UI normalmente
+        updateSlot(slotId, status);
     } else {
         console.error("Formato del messaggio non valido:", msg);
     }
@@ -64,6 +71,9 @@ function loadSlots() {
             tableBody.innerHTML = ""; // Pulisce la tabella
 
             slots.forEach(slot => {
+                // Salva lo stato iniziale nello storage locale
+                previousStates.set(slot.id, slot.status);
+
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${slot.id}</td>
@@ -78,20 +88,36 @@ function loadSlots() {
                 tableBody.appendChild(row);
             });
 
-            // Aggiungi l'evento click per il bottone sospendi
+            // Aggiungi l'evento click per il bottone sospendi/ripristina
             document.querySelectorAll('.suspend-btn').forEach(button => {
                 button.addEventListener('click', function () {
                     const slotId = this.getAttribute('data-id');
+                    const slotElement = document.querySelector(`#slot-${slotId}`);
+                    const ledElement = document.querySelector(`#led-${slotId}`);
+
                     if (suspendedSlots.has(slotId)) {
-                        // Se lo slot è già sospeso, attivalo (accendi il pulsante)
+                        //  Ripristina lo stato precedente
                         suspendedSlots.delete(slotId);
                         this.innerText = "Sospendi";
                         console.log(`Slot ${slotId} ripristinato`);
+
+                        // Recupera lo stato precedente e lo applica
+                        const previousStatus = previousStates.get(slotId);
+                        slotElement.innerText = previousStatus === "1" ? "Occupato" : "Libero";
+                        ledElement.style.backgroundColor = previousStatus === "1" ? "red" : "green";
                     } else {
-                        // Se lo slot non è sospeso, sospendilo (spegnere il pulsante)
+                        // Sospende lo slot (colore giallo + "Sospeso")
                         suspendedSlots.add(slotId);
                         this.innerText = "Ripristina";
                         console.log(`Slot ${slotId} sospeso`);
+
+                        // Salva lo stato attuale prima di sospendere
+                        if (!previousStates.has(slotId)) {
+                            previousStates.set(slotId, slotElement.innerText === "Occupato" ? "1" : "0");
+                        }
+
+                        slotElement.innerText = "Sospeso";
+                        ledElement.style.backgroundColor = "yellow"; // LED giallo per slot sospeso
                     }
                 });
             });
